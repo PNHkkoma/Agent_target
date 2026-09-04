@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 
+# Chuyển log ứng dụng thành từng dòng JSON để dễ theo dõi.
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         payload: dict[str, Any] = {
@@ -37,4 +38,3 @@ def configure_logging(level: str) -> None:
     root.handlers.clear()
     root.addHandler(handler)
     root.setLevel(level.upper())
-

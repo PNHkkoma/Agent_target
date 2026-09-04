@@ -31,6 +31,8 @@ RouterDependency = Annotated[ModelRouter, Depends(get_router)]
 @router.post("/chat", response_model=ChatResponse, response_model_by_alias=True)
 async def chat(payload: ChatRequest, model_router: RouterDependency) -> ChatResponse:
     request_id = str(uuid4())
+
+    #gửi message nguyên vẹn tới module xử lý
     response, _ = await model_router.chat(
         payload.to_messages(),
         payload.options,
@@ -56,13 +58,18 @@ async def structured_chat(
     payload: ChatRequest, model_router: RouterDependency
 ) -> StructuredChatResponse:
     request_id = str(uuid4())
+
+    
     structured_prompt = (
         "Extract the shopping intent. Return only a JSON object with exactly these fields: "
         "category (string), budget_max (positive integer in VND), requirements "
         "(non-empty array of strings). Do not wrap JSON in Markdown."
     )
     messages = payload.to_messages()
+
+    #ghi đè system promt để bắt model trích xuất ý định mua sắm, nếu không xác định được ý định mua sắm, báo lỗi???
     messages[0].content = f"{structured_prompt}\n\nAdditional instructions:\n{payload.system_prompt}"
+    #ép response_format thành json_object, bỏ qua "text" truyền vào
     options = payload.options.model_copy(update={"response_format": ResponseFormat.JSON_OBJECT})
     response, parsed = await model_router.chat(
         messages,

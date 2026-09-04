@@ -33,6 +33,14 @@ def test_chat_endpoint_returns_unified_camel_case_response() -> None:
     }
 
 
+def test_openai_is_available_as_a_provider() -> None:
+    provider = FakeProvider("openai", responses=[response("openai", "Hello")])
+    with make_client(provider) as client:
+        result = client.post("/api/chat", json={"message": "Hello"})
+    assert result.status_code == 200
+    assert result.json()["provider"] == "openai"
+
+
 def test_structured_endpoint_parses_and_validates_json() -> None:
     provider = FakeProvider(
         "qwen",
@@ -75,4 +83,3 @@ def test_stream_endpoint_emits_token_usage_and_done_events() -> None:
     assert "event: token" in result.text
     assert "event: usage" in result.text
     assert "event: done" in result.text
-

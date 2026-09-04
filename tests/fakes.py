@@ -6,6 +6,7 @@ from app.llm.base import LLMProvider
 from app.schemas.chat import ChatOptions, LLMResponse, Message, StreamChunk
 
 
+# Provider giả lập để kiểm thử router và API mà không gọi mạng thật.
 class FakeProvider(LLMProvider):
     def __init__(
         self,
@@ -57,4 +58,3 @@ def response(provider: str, content: str = "hello") -> LLMResponse:
         output_tokens=5,
         latency_ms=20,
     )
-

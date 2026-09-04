@@ -6,6 +6,7 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# Đọc và kiểm tra cấu hình ứng dụng từ biến môi trường hoặc .env.
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -36,6 +37,10 @@ class Settings(BaseSettings):
     kimi_api_key: str = ""
     kimi_base_url: str = "https://api.moonshot.ai/v1"
     kimi_model: str = "kimi-k2.5"
+
+    openai_api_key: str = ""
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-4.1-mini-2025-04-14"
 
     @field_validator("llm_fallback_providers", mode="before")
     @classmethod

@@ -43,6 +43,20 @@ LLM_PROVIDER=qwen
 Provider keys are independent. A provider without a key is skipped safely.
 Fallback order is configured with `LLM_FALLBACK_PROVIDERS=qwen,kimi`.
 
+To use OpenAI's pinned GPT-4.1 Mini snapshot, set an API key outside source
+control and change only configuration:
+
+```dotenv
+LLM_PROVIDER=openai
+OPENAI_MODEL=gpt-4.1-mini-2025-04-14
+```
+
+The `OPENAI_API_KEY` environment variable is read automatically. GPT-4.1 Mini
+supports this project's Chat Completions, streaming, and structured-output
+paths. Its text pricing is $0.40 per 1M input tokens, $0.10 per 1M cached input
+tokens, and $1.60 per 1M output tokens (check the live OpenAI pricing page
+before production budgeting).
+
 ## Examples
 
 Raw chat:
@@ -111,4 +125,3 @@ Authentication errors and invalid requests are not retried. Timeouts, 429,
 connection resets, malformed/empty responses, model unavailability and 5xx are
 contained and eligible for bounded retry/fallback. Context-window errors are
 reported as a client error and never crash the application.
-

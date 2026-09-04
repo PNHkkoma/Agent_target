@@ -21,6 +21,7 @@ ResponseValidator = Callable[[str], T]
 logger = logging.getLogger("agent_lab.llm")
 
 
+# Chọn provider, retry có giới hạn và fallback khi provider lỗi.
 class ModelRouter:
     """Config-first V1 router with bounded retries and ordered fallback."""
 
@@ -198,4 +199,3 @@ class ModelRouter:
                 "errorCode": error.code,
             },
         )
-

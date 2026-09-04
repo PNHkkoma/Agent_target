@@ -10,6 +10,7 @@ from app.config import Settings, get_settings
 from app.llm.deepseek import DeepSeekProvider
 from app.llm.errors import AllProvidersFailedError, LLMError
 from app.llm.kimi import KimiProvider
+from app.llm.openai import OpenAIProvider
 from app.llm.qwen import QwenProvider
 from app.llm.router import ModelRouter
 from app.logging import configure_logging
@@ -20,6 +21,7 @@ def build_router(settings: Settings) -> ModelRouter:
         "deepseek": DeepSeekProvider(settings),
         "qwen": QwenProvider(settings),
         "kimi": KimiProvider(settings),
+        "openai": OpenAIProvider(settings),
     }
     return ModelRouter(providers, settings)
 
@@ -65,4 +67,3 @@ def create_app(
 
 
 app = create_app()
-

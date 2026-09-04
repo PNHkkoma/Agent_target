@@ -22,6 +22,7 @@ from app.llm.errors import (
 from app.schemas.chat import ChatOptions, LLMResponse, Message, ResponseFormat, StreamChunk
 
 
+# Dùng chung logic HTTP cho các API có định dạng OpenAI Chat Completions.
 class OpenAICompatibleProvider(LLMProvider):
     def __init__(
         self,
@@ -180,4 +181,3 @@ class OpenAICompatibleProvider(LLMProvider):
     async def close(self) -> None:
         if self._owns_client:
             await self.client.aclose()
-
