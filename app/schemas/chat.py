@@ -6,10 +6,38 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
-# Một message chuẩn gửi đến model.
+# Một function call do model yêu cầu ứng dụng thực thi.
+class FunctionCall(BaseModel):
+    name: str = Field(min_length=1)
+    arguments: str
+
+
+# Một tool call có ID để ghép kết quả tool vào đúng yêu cầu của model.
+class ToolCall(BaseModel):
+    id: str = Field(min_length=1)
+    type: Literal["function"] = "function"
+    function: FunctionCall
+
+
+# Một message chuẩn gửi đến model, gồm cả assistant/tool trong agent loop.
 class Message(BaseModel):
-    role: Literal["system", "user", "assistant"]
-    content: str = Field(min_length=1, max_length=100_000)
+    role: Literal["system", "user", "assistant", "tool"]
+    content: str | None = Field(default=None, max_length=100_000)
+    tool_calls: list[ToolCall] | None = None
+    tool_call_id: str | None = None
+
+    # Nhận Message sau khi Pydantic parse; trả message hợp lệ theo role hoặc báo lỗi contract.
+    @model_validator(mode="after")
+    def validate_role_fields(self) -> "Message":
+        if self.role in {"system", "user"} and not (self.content or "").strip():
+            raise ValueError(f"{self.role} message requires non-empty content")
+        if self.role == "assistant" and not (self.content or "").strip() and not self.tool_calls:
+            raise ValueError("assistant message requires content or tool_calls")
+        if self.role == "tool" and (not self.tool_call_id or self.content is None):
+            raise ValueError("tool message requires tool_call_id and content")
+        if self.role != "assistant" and self.tool_calls is not None:
+            raise ValueError("only assistant messages may contain tool_calls")
+        return self
 
 
 # Một message trong lịch sử hội thoại do client gửi lên.
@@ -103,6 +131,7 @@ class LLMResponse(BaseModel):
     output_tokens: int = 0
     latency_ms: int
     finish_reason: str | None = None
+    tool_calls: list[ToolCall] = Field(default_factory=list)
 
 
 # Phản hồi chat công khai với tên trường camelCase.

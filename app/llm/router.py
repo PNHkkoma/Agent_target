@@ -4,7 +4,7 @@ import asyncio
 import logging
 import time
 from collections.abc import AsyncIterator, Callable
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from app.config import Settings
 from app.llm.base import LLMProvider
@@ -55,6 +55,8 @@ class ModelRouter:
         task: TaskType,
         request_id: str,
         validate: ResponseValidator[T] | None = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
     ) -> tuple[LLMResponse, T | None]:
         errors: list[LLMError] = []
         for provider_name in self.provider_order(task):
@@ -69,7 +71,12 @@ class ModelRouter:
             for attempt in range(self.settings.llm_max_retries + 1):
                 started = time.perf_counter()
                 try:
-                    response = await provider.chat(messages, options)
+                    response = await provider.chat(
+                        messages,
+                        options,
+                        tools=tools,
+                        tool_choice=tool_choice,
+                    )
                     parsed: T | None = None
                     if validate is not None:
                         try:

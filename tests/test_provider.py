@@ -61,6 +61,60 @@ async def test_chat_maps_openai_response_and_usage() -> None:
 
 
 @pytest.mark.asyncio
+async def test_chat_sends_tools_and_parses_tool_calls() -> None:
+    async def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        assert payload["tool_choice"] == "auto"
+        assert payload["tools"][0]["function"]["name"] == "calculate"
+        return httpx.Response(
+            200,
+            json={
+                "model": "actual-model",
+                "choices": [
+                    {
+                        "message": {
+                            "role": "assistant",
+                            "content": None,
+                            "tool_calls": [
+                                {
+                                    "id": "call-1",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "calculate",
+                                        "arguments": '{"expression":"2+2"}',
+                                    },
+                                }
+                            ],
+                        },
+                        "finish_reason": "tool_calls",
+                    }
+                ],
+                "usage": {"prompt_tokens": 20, "completion_tokens": 8},
+            },
+        )
+
+    provider = make_provider(handler)
+    result = await provider.chat(
+        [Message(role="user", content="2+2")],
+        ChatOptions(),
+        tools=[
+            {
+                "type": "function",
+                "function": {
+                    "name": "calculate",
+                    "description": "Calculate",
+                    "parameters": {"type": "object"},
+                },
+            }
+        ],
+        tool_choice="auto",
+    )
+    assert result.content == ""
+    assert result.tool_calls[0].function.name == "calculate"
+    await provider.client.aclose()
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("status", "body", "error_type"),
     [
@@ -137,4 +191,3 @@ async def test_stream_parses_tokens_and_usage() -> None:
     assert "".join(chunk.content for chunk in chunks) == "Xin chào"
     assert chunks[-1].input_tokens == 7
     await provider.client.aclose()
-

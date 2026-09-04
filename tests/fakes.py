@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from typing import Any
 
 from app.llm.base import LLMProvider
 from app.schemas.chat import ChatOptions, LLMResponse, Message, StreamChunk
@@ -24,11 +25,20 @@ class FakeProvider(LLMProvider):
         self.stream_calls = 0
         self.last_messages: list[Message] = []
         self.last_options: ChatOptions | None = None
+        self.last_tools: list[dict[str, Any]] | None = None
 
-    async def chat(self, messages: list[Message], options: ChatOptions) -> LLMResponse:
+    async def chat(
+        self,
+        messages: list[Message],
+        options: ChatOptions,
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+    ) -> LLMResponse:
         self.chat_calls += 1
         self.last_messages = messages
         self.last_options = options
+        self.last_tools = tools
         result = self.responses.pop(0)
         if isinstance(result, Exception):
             raise result

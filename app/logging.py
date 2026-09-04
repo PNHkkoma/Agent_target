@@ -25,6 +25,14 @@ class JsonFormatter(logging.Formatter):
             "status",
             "attempt",
             "errorCode",
+            "event",
+            "step",
+            "tool",
+            "toolCallId",
+            "arguments",
+            "result",
+            "totalSteps",
+            "totalToolCalls",
         ):
             if hasattr(record, field):
                 payload[field] = getattr(record, field)

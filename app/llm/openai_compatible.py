@@ -19,7 +19,15 @@ from app.llm.errors import (
     ProviderTimeoutError,
     ProviderUnavailableError,
 )
-from app.schemas.chat import ChatOptions, LLMResponse, Message, ResponseFormat, StreamChunk
+from app.schemas.chat import (
+    ChatOptions,
+    FunctionCall,
+    LLMResponse,
+    Message,
+    ResponseFormat,
+    StreamChunk,
+    ToolCall,
+)
 
 
 # Dùng chung logic HTTP cho các API có định dạng OpenAI Chat Completions.
@@ -49,11 +57,17 @@ class OpenAICompatibleProvider(LLMProvider):
         )
 
     def _payload(
-        self, messages: list[Message], options: ChatOptions, *, stream: bool
+        self,
+        messages: list[Message],
+        options: ChatOptions,
+        *,
+        stream: bool,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": self.model,
-            "messages": [message.model_dump() for message in messages],
+            "messages": [message.model_dump(exclude_none=True) for message in messages],
             "temperature": (
                 options.temperature
                 if options.temperature is not None
@@ -64,24 +78,53 @@ class OpenAICompatibleProvider(LLMProvider):
         }
         if options.response_format is ResponseFormat.JSON_OBJECT:
             payload["response_format"] = {"type": "json_object"}
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = tool_choice or "auto"
         if stream:
             payload["stream_options"] = {"include_usage": True}
         return payload
 
     async def chat(
-        self, messages: list[Message], options: ChatOptions
+        self,
+        messages: list[Message],
+        options: ChatOptions,
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
     ) -> LLMResponse:
         started = time.perf_counter()
         try:
             response = await self.client.post(
-                "/chat/completions", json=self._payload(messages, options, stream=False)
+                "/chat/completions",
+                json=self._payload(
+                    messages,
+                    options,
+                    stream=False,
+                    tools=tools,
+                    tool_choice=tool_choice,
+                ),
             )
             self._raise_for_status(response)
             body = response.json()
-            content = body["choices"][0]["message"]["content"]
+            choice = body["choices"][0]
+            message = choice["message"]
+            content = message.get("content") or ""
             if not isinstance(content, str):
                 raise TypeError("message content is not text")
-            if not content.strip():
+            raw_tool_calls = message.get("tool_calls") or []
+            tool_calls = [
+                ToolCall(
+                    id=item["id"],
+                    type=item.get("type", "function"),
+                    function=FunctionCall(
+                        name=item["function"]["name"],
+                        arguments=item["function"]["arguments"],
+                    ),
+                )
+                for item in raw_tool_calls
+            ]
+            if not content.strip() and not tool_calls:
                 raise EmptyResponseError("Provider returned empty content", provider=self.name)
             usage = body.get("usage") or {}
             return LLMResponse(
@@ -91,7 +134,8 @@ class OpenAICompatibleProvider(LLMProvider):
                 input_tokens=int(usage.get("prompt_tokens") or 0),
                 output_tokens=int(usage.get("completion_tokens") or 0),
                 latency_ms=round((time.perf_counter() - started) * 1000),
-                finish_reason=body["choices"][0].get("finish_reason"),
+                finish_reason=choice.get("finish_reason"),
+                tool_calls=tool_calls,
             )
         except LLMError:
             raise
@@ -109,7 +153,9 @@ class OpenAICompatibleProvider(LLMProvider):
     ) -> AsyncIterator[StreamChunk]:
         try:
             async with self.client.stream(
-                "POST", "/chat/completions", json=self._payload(messages, options, stream=True)
+                "POST",
+                "/chat/completions",
+                json=self._payload(messages, options, stream=True),
             ) as response:
                 self._raise_for_status(response)
                 saw_content = False

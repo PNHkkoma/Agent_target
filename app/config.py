@@ -15,7 +15,7 @@ class Settings(BaseSettings):
         enable_decoding=False,
     )
 
-    app_name: str = "Agent Lab - Phase 1"
+    app_name: str = "Agent Lab - Phase 2"
     log_level: str = "INFO"
 
     llm_provider: str = "deepseek"
@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     llm_retry_base_delay_seconds: float = Field(default=0.25, ge=0, le=10)
     llm_temperature: float = Field(default=0.7, ge=0, le=2)
     llm_max_tokens: int = Field(default=1024, gt=0)
+
+    agent_max_steps: int = Field(default=8, ge=1, le=20)
+    agent_max_tool_calls: int = Field(default=12, ge=1, le=50)
+    agent_max_duplicate_calls: int = Field(default=1, ge=0, le=5)
+    agent_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
+    tool_timeout_seconds: float = Field(default=2.0, gt=0, le=30)
 
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"

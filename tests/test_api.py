@@ -4,6 +4,7 @@ from app.config import Settings
 from app.llm.router import ModelRouter
 from app.main import create_app
 from app.schemas.chat import StreamChunk
+from app.schemas.chat import FunctionCall, ToolCall
 from tests.fakes import FakeProvider, response
 
 
@@ -83,3 +84,29 @@ def test_stream_endpoint_emits_token_usage_and_done_events() -> None:
     assert "event: token" in result.text
     assert "event: usage" in result.text
     assert "event: done" in result.text
+
+
+def test_agent_endpoint_executes_tool_loop_and_returns_trace() -> None:
+    first = response("openai", "")
+    first.finish_reason = "tool_calls"
+    first.tool_calls = [
+        ToolCall(
+            id="calc-1",
+            function=FunctionCall(name="calculate", arguments='{"expression":"6*7"}'),
+        )
+    ]
+    provider = FakeProvider(
+        "openai",
+        responses=[first, response("openai", "42")],
+    )
+    with make_client(provider) as client:
+        result = client.post(
+            "/api/agent/chat",
+            json={"message": "Calculate 6 * 7", "options": {"temperature": 0}},
+        )
+    assert result.status_code == 200
+    body = result.json()
+    assert body["content"] == "42"
+    assert body["totalToolCalls"] == 1
+    assert body["trace"][1]["tool"] == "calculate"
+    assert result.headers["X-Request-ID"]

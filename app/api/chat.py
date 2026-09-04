@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 from typing import Annotated
-from uuid import uuid4
-
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
@@ -29,8 +27,10 @@ RouterDependency = Annotated[ModelRouter, Depends(get_router)]
 
 
 @router.post("/chat", response_model=ChatResponse, response_model_by_alias=True)
-async def chat(payload: ChatRequest, model_router: RouterDependency) -> ChatResponse:
-    request_id = str(uuid4())
+async def chat(
+    payload: ChatRequest, request: Request, model_router: RouterDependency
+) -> ChatResponse:
+    request_id = request.state.request_id
 
     #gửi message nguyên vẹn tới module xử lý
     response, _ = await model_router.chat(
@@ -55,9 +55,9 @@ def parse_shopping_intent(content: str) -> ShoppingIntent:
     response_model_by_alias=True,
 )
 async def structured_chat(
-    payload: ChatRequest, model_router: RouterDependency
+    payload: ChatRequest, request: Request, model_router: RouterDependency
 ) -> StructuredChatResponse:
-    request_id = str(uuid4())
+    request_id = request.state.request_id
 
     
     structured_prompt = (
@@ -91,9 +91,9 @@ async def structured_chat(
 
 @router.post("/chat/stream")
 async def stream_chat(
-    payload: ChatRequest, model_router: RouterDependency
+    payload: ChatRequest, request: Request, model_router: RouterDependency
 ) -> StreamingResponse:
-    request_id = str(uuid4())
+    request_id = request.state.request_id
 
     async def event_source():
         try:
@@ -116,4 +116,3 @@ async def stream_chat(
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
-

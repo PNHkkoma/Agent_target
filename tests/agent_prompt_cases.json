@@ -1,0 +1,38 @@
+[
+  {
+    "id": "no-tool-concept",
+    "prompt": "Balo là gì?",
+    "expected_tools": [],
+    "match": "exact"
+  },
+  {
+    "id": "calculator",
+    "prompt": "38 × 27 + 17 bằng bao nhiêu?",
+    "expected_tools": ["calculate"],
+    "match": "exact"
+  },
+  {
+    "id": "search-products",
+    "prompt": "Tìm túi du lịch đang có hàng, giá dưới 700 nghìn và nặng không quá 700 gram.",
+    "expected_tools": ["search_products", "get_product"],
+    "match": "exact"
+  },
+  {
+    "id": "product-detail",
+    "prompt": "Travel Bag A, sản phẩm ID 1, hiện tại giá bao nhiêu?",
+    "expected_tools": ["get_product"],
+    "match": "exact"
+  },
+  {
+    "id": "compare-products",
+    "prompt": "So sánh chi tiết sản phẩm ID 1 và ID 2. Không được đoán thông tin.",
+    "expected_tools": ["get_product", "get_product"],
+    "match": "exact"
+  },
+  {
+    "id": "weather-shopping-multistep",
+    "prompt": "Tôi đi Đà Lạt cuối tuần, ngân sách 1 triệu và muốn áo nhẹ. Hãy kiểm tra thời tiết giả lập rồi chọn một sản phẩm phù hợp.",
+    "expected_tools": ["get_weather", "search_products", "get_product", "get_product"],
+    "match": "exact"
+  }
+]
