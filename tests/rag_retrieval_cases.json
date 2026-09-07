@@ -1,0 +1,17 @@
+[
+  {"id":"rag-01","query":"túi nén làm từ ripstop nylon 70D","expected_document":"compression-manual"},
+  {"id":"rag-02","query":"kích thước túi nén cỡ M","expected_document":"compression-manual"},
+  {"id":"rag-03","query":"cách kéo khóa nén vòng ngoài","expected_document":"compression-manual"},
+  {"id":"rag-04","query":"có nên cho thiết bị điện tử vào túi nén","expected_document":"compression-manual"},
+  {"id":"rag-05","query":"giới hạn cabin đi Nhật thường gặp 7 kg","expected_document":"japan-cabin-policy"},
+  {"id":"rag-06","query":"túi nén có làm giảm cân nặng không","expected_document":"japan-cabin-policy"},
+  {"id":"rag-07","query":"cần kiểm tra quy định hãng bay ở đâu","expected_document":"japan-cabin-policy"},
+  {"id":"rag-08","query":"đi Nhật tháng 12 mặc đồ theo lớp","expected_document":"winter-packing-guide"},
+  {"id":"rag-09","query":"áo giữ nhiệt nên dùng túi cỡ nào","expected_document":"winter-packing-guide"},
+  {"id":"rag-10","query":"mang đồ cho chuyến đi tám ngày mùa đông","expected_document":"winter-packing-guide"},
+  {"id":"rag-11","query":"review nói gì về khóa kéo và vải khó rách","expected_document":"compression-review","filters":{"document_type":"review"}},
+  {"id":"rag-12","query":"điểm đánh giá trung bình 4,4 trên 5","expected_document":"compression-review"},
+  {"id":"rag-13","query":"nhược điểm túi cỡ L dễ vượt cân","expected_document":"compression-review"},
+  {"id":"rag-14","query":"đổi trả trong bao nhiêu ngày","expected_document":"return-policy","filters":{"document_type":"policy"}},
+  {"id":"rag-15","query":"rách do vật sắc nhọn có phải lỗi sản xuất","expected_document":"return-policy"}
+]

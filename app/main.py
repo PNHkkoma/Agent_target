@@ -6,9 +6,10 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.agent.runner import AgentRunner
+from app.agent.runner import ShoppingAgentV0
 from app.api.agent import router as agent_router
 from app.api.chat import router as chat_router
+from app.api.rag import router as rag_router
 from app.config import Settings, get_settings
 from app.llm.deepseek import DeepSeekProvider
 from app.llm.errors import AllProvidersFailedError, LLMError
@@ -17,6 +18,7 @@ from app.llm.openai import OpenAIProvider
 from app.llm.qwen import QwenProvider
 from app.llm.router import ModelRouter
 from app.logging import configure_logging
+from app.rag import RagService, build_rag_service
 from app.tools import build_default_registry
 
 
@@ -31,12 +33,13 @@ def build_router(settings: Settings) -> ModelRouter:
     return ModelRouter(providers, settings)
 
 
-# Nhận settings/router/runner tùy chọn; trả ứng dụng FastAPI hoàn chỉnh để chạy hoặc test.
+# Nhận settings/router/agent/RAG tùy chọn; trả ứng dụng FastAPI hoàn chỉnh để chạy hoặc test.
 def create_app(
     *,
     settings: Settings | None = None,
     model_router: ModelRouter | None = None,
-    agent_runner: AgentRunner | None = None,
+    agent_runner: ShoppingAgentV0 | None = None,
+    rag_service: RagService | None = None,
 ) -> FastAPI:
     resolved_settings = settings or get_settings()
     configure_logging(resolved_settings.log_level)
@@ -45,17 +48,23 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.model_router = model_router or build_router(resolved_settings)
-        app.state.agent_runner = agent_runner or AgentRunner(
+        app.state.agent_runner = agent_runner or ShoppingAgentV0(
             app.state.model_router,
             build_default_registry(resolved_settings.tool_timeout_seconds),
             resolved_settings,
         )
+        app.state.rag_service = rag_service or build_rag_service(
+            resolved_settings, app.state.model_router
+        )
+        await app.state.rag_service.initialize()
         yield
+        await app.state.rag_service.close()
         await app.state.model_router.close()
 
     app = FastAPI(title=resolved_settings.app_name, version="2.0.0", lifespan=lifespan)
     app.include_router(chat_router)
     app.include_router(agent_router)
+    app.include_router(rag_router)
 
     # Nhận request và handler kế tiếp; trả response có cùng X-Request-ID để truy vết.
     @app.middleware("http")

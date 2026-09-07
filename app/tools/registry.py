@@ -12,9 +12,8 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 # Các quyền tối thiểu mà một tool được phép yêu cầu.
 class ToolPermission(str, Enum):
-    COMPUTE = "compute"
     CATALOG_READ = "catalog:read"
-    WEATHER_READ = "weather:read"
+    ORDER_READ = "order:read"
 
 
 # Lớp cơ sở cấm arguments dư trước khi gọi business handler.

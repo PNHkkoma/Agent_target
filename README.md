@@ -1,4 +1,4 @@
-# Agent Lab — Phase 2
+# Agent Lab — Phase 3
 
 Đây là lớp ứng dụng LLM viết bằng FastAPI và không dùng agent framework.
 Business code chỉ làm việc với `ModelRouter`, vì vậy có thể đổi giữa DeepSeek,
@@ -8,22 +8,29 @@ Phase 2 bổ sung agent loop: model được quyền yêu cầu một tool trong
 ứng dụng kiểm tra đầu vào, thực thi tool, gửi kết quả về model và tiếp tục cho
 đến khi có câu trả lời cuối hoặc chạm giới hạn an toàn.
 
+Phase 3 bổ sung knowledge bằng RAG tự dựng: document → chunk → embedding →
+vector search → context → LLM → answer kèm citation. Chưa dùng LangChain.
+
 ## Chức năng đã có
 
 - `POST /api/chat`: chat thông thường và hội thoại nhiều lượt.
 - `POST /api/chat/structured`: yêu cầu JSON và kiểm tra schema `ShoppingIntent`.
 - `POST /api/chat/stream`: stream bằng Server-Sent Events.
 - `POST /api/agent/chat`: agent có khả năng tự chọn và gọi tool nhiều bước.
+- `POST /api/rag/documents`: ingest document vào knowledge base.
+- `POST /api/rag/search`: xem trực tiếp top-K chunk và similarity score.
+- `POST /api/rag/ask`: hỏi đáp dựa trên context và nhận citation.
 - Chọn provider/model theo cấu hình và loại task.
 - Retry có giới hạn, fallback provider, timeout và hệ thống lỗi có kiểu rõ ràng.
 - Log JSON cho từng lần gọi model/tool, gồm request ID, model, token và latency.
 - `ToolRegistry` có JSON Schema, allowlist, permission, validation và timeout.
-- Calculator an toàn, catalog sản phẩm giả lập và thời tiết giả lập.
+- Đúng 5 shopping tool sử dụng catalog, tồn kho, phí ship và đơn hàng giả lập.
 - Chống lặp tool call, giới hạn tổng số bước, số tool call và tổng thời gian.
 - Bộ test tự động và corpus đánh giá quyết định chọn tool.
 
-Dự án hiện chưa dùng database, Redis, Kafka, vector store, LangChain hoặc agent
-framework khác. Dữ liệu sản phẩm và thời tiết đều là dữ liệu giả lập trong code.
+Dữ liệu shopping tool vẫn là giả lập. Knowledge RAG có thể dùng memory store khi test hoặc
+PostgreSQL + pgvector khi chạy bền vững; dự án chưa dùng Redis, Kafka, LangChain hay agent
+framework khác.
 
 ## Yêu cầu
 
@@ -78,6 +85,146 @@ Thứ tự fallback được cấu hình như sau:
 LLM_FALLBACK_PROVIDERS=qwen,kimi,openai
 ```
 
+## Sử dụng RAG Phase 3
+
+Chạy đầy đủ FastAPI và PostgreSQL/pgvector:
+
+```powershell
+docker compose up --build
+```
+
+PostgreSQL của project dùng cổng host `5433` vì máy có thể đã dùng `5432` cho
+database khác. Container ứng dụng kết nối PostgreSQL qua mạng nội bộ cổng `5432`.
+
+Để chạy FastAPI trực tiếp trên Windows nhưng vẫn lưu vector vào container:
+
+```dotenv
+RAG_STORE=postgres
+RAG_DATABASE_URL=postgresql://agent:agent@localhost:5433/agent_lab
+```
+
+Ingest một tài liệu:
+
+```json
+POST /api/rag/documents
+{
+  "id": "compression-manual",
+  "title": "Hướng dẫn túi nén",
+  "content": "Túi được làm từ ripstop nylon 70D...",
+  "source_uri": "https://knowledge.local/manuals/compression",
+  "document_type": "manual",
+  "metadata": {
+    "product_id": "CB-PRO",
+    "locale": "vi-VN"
+  }
+}
+```
+
+Kiểm tra retrieval trước khi hỏi model:
+
+```json
+POST /api/rag/search
+{
+  "query": "túi nén làm từ vật liệu gì?",
+  "top_k": 3,
+  "min_score": 0.15,
+  "filters": {
+    "product_id": "CB-PRO"
+  }
+}
+```
+
+Hỏi RAG và nhận nguồn:
+
+```json
+POST /api/rag/ask
+{
+  "query": "Tôi đi Nhật tháng 12 và cabin 7kg, nên dùng túi nén thế nào?",
+  "top_k": 3,
+  "filters": {}
+}
+```
+
+Response có `answer` và `citations`. Mỗi citation chứa `documentId`, `chunkId`,
+`sourceUri`, excerpt và retrieval score. Nếu không có chunk đạt threshold, service
+không gọi LLM và trả lời rằng knowledge base không đủ thay vì đoán.
+
+Embedding mặc định trên đường production:
+
+```dotenv
+EMBEDDING_PROVIDER=openai
+EMBEDDING_BASE_URL=https://api.openai.com/v1
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIMENSIONS=1536
+EMBEDDING_VERSION=2
+```
+
+`local_hash` không còn là lựa chọn trong factory production. Nó chỉ được unit test inject trực
+tiếp để test offline và không tốn tiền. Production dùng API semantic; có thể đặt key riêng:
+
+```dotenv
+EMBEDDING_PROVIDER=openai
+EMBEDDING_API_KEY=your-key
+EMBEDDING_BASE_URL=https://api.openai.com/v1
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIMENSIONS=1536
+EMBEDDING_VERSION=2
+```
+
+Nếu `EMBEDDING_API_KEY` trống, cấu hình OpenAI sẽ dùng `OPENAI_API_KEY`. Không
+được đổi dimensions sau khi đã tạo bảng pgvector; nếu đổi provider/model/dimensions/version,
+cần re-embed toàn bộ document. Chunk lưu `embedding_provider`, `embedding_model`,
+`embedding_dimension`, `embedding_version`; retrieval chỉ search đúng cùng không gian vector.
+Document còn có `document_version`, `content_hash`, `chunk_index`, và chunk ID deterministic để
+upload lại cùng nội dung không tạo duplicate vô hạn.
+
+Dữ liệu demo nằm trong `knowledge/sample_documents.json`. Đo baseline retrieval:
+
+```powershell
+python -m experiments.rag_evaluation
+python -m experiments.pgvector_smoke
+```
+
+15 query cũ vẫn được giữ làm regression set. Eval hiện có 100 query trên các nhóm paraphrase,
+typo, query rất ngắn, SKU chính xác, hard negative, no-answer, metadata filter và câu hỏi nhiều
+điều kiện.
+
+Pipeline production hiện là `embedding 1536 → dense pgvector + PostgreSQL FTS → RRF top 20 →
+LLM rerank top 5 → confidence gate`. Full dimension 1536 đạt Hit@1 `80%` so với `74.44%` ở 384.
+Sau hybrid + reranker, benchmark đạt Hit@1 `96.67%`, Hit@5 `100%`, MRR `0.983`; riêng SKU, typo,
+hard-negative, metadata filter và multi-condition đều Hit@1 `100%` trong corpus hiện tại.
+
+No-answer không dùng `RAG_MIN_SCORE` cũ. Ngưỡng được lấy từ `threshold_calibration.py`: high khi
+relevance `>= 1.0` và reranker confidence `>= 0.7`; medium từ relevance `>= 0.5`; thấp hơn là low.
+High gọi LLM trả lời với citation, medium yêu cầu thêm ngữ cảnh, low từ chối an toàn. Phải chạy lại
+calibration khi đổi embedding, reranker, corpus hoặc prompt.
+
+Khi có metadata filter và dùng HNSW, bước quét ANN có thể thiếu candidate do filter
+được áp sau ANN. Production dùng iterative scan strict order:
+
+```dotenv
+RAG_HNSW_ITERATIVE_SCAN=strict_order
+```
+
+## Evaluation Phase 3
+
+```powershell
+# Dev set: dùng để tune retrieval/reranker/threshold.
+python -m experiments.rag_evaluation
+python -m experiments.rag_answer_evaluation
+
+# Benchmark exact/HNSW/filter/iterative scan trên bảng tách biệt và tự xóa sau khi chạy.
+python -m experiments.ann_filter_benchmark
+
+# Holdout 60 query: chỉ chạy final validation, không dùng để tinh chỉnh pipeline.
+python -m experiments.rag_holdout_evaluation
+```
+
+`rag_answer_evaluation` kiểm 50 case grounded answer, citation, hallucination và hành vi
+high/medium/low. Citation chỉ trả về chunk evidence mà model đã gắn nhãn `[S#]`; nếu
+model không gắn citation nào, service không trả answer high. `rag_holdout_evaluation`
+tự kiểm tra truy vấn không trùng dev set trước khi đo Hit@1, Hit@5, MRR và no-answer.
+
 ## Sử dụng Agent API
 
 Endpoint:
@@ -91,7 +238,7 @@ Ví dụ yêu cầu nhiều bước:
 
 ```json
 {
-  "message": "Cuối tuần Đà Lạt có mưa không? Tìm áo khoác dưới 1 triệu và chọn mẫu nhẹ nhất.",
+  "message": "So sánh chi tiết P001 với P002 rồi tính phí ship cả hai tới Hà Nội.",
   "history": [],
   "system_prompt": "Trả lời bằng tiếng Việt, ngắn gọn.",
   "task": "complex_reasoning",
@@ -107,7 +254,7 @@ Ví dụ yêu cầu nhiều bước:
 Agent có thể tự thực hiện chuỗi hành động:
 
 ```text
-get_weather → search_products → get_product → trả lời
+get_product_detail(P001) → get_product_detail(P002) → calculate_shipping_fee → trả lời
 ```
 
 Các trường riêng của Agent API:
@@ -117,22 +264,23 @@ Các trường riêng của Agent API:
 - `include_trace`: `true` để trả lịch sử model/tool step phục vụ học tập và debug;
   đặt `false` nếu phía client chỉ cần câu trả lời cuối.
 
-Ví dụ chỉ cho phép calculator:
+Ví dụ chỉ cho phép tra tồn kho:
 
 ```json
 {
-  "message": "38 * 27 + 17 bằng bao nhiêu?",
-  "allowed_tools": ["calculate"],
+  "message": "P001 còn hàng không?",
+  "allowed_tools": ["check_inventory"],
   "include_trace": true
 }
 ```
 
 Các tool hiện có:
 
-- `calculate`: tính số học bằng AST allowlist, không dùng `eval`.
-- `search_products`: tìm sản phẩm còn hàng theo category, giá và cân nặng.
-- `get_product`: lấy thông tin đầy đủ theo ID sản phẩm.
-- `get_weather`: lấy thời tiết giả lập theo thành phố.
+- `search_products`: tìm sản phẩm theo từ khóa, category, giá và cân nặng.
+- `get_product_detail`: lấy giá, cân nặng và tính năng theo ID/tên sản phẩm.
+- `check_inventory`: kiểm tra số lượng tồn kho theo ID/tên sản phẩm.
+- `calculate_shipping_fee`: tính phí ship theo sản phẩm và điểm đến.
+- `get_order_status`: tra trạng thái đơn hàng theo mã đơn.
 
 Response của Agent API gồm:
 
@@ -219,8 +367,8 @@ TOOL_TIMEOUT_SECONDS=2
 - Tool ngoài allowlist không được thực thi.
 - Tool không có quyền phù hợp trả lỗi `PERMISSION_DENIED`.
 - Một tool call giống hệt không được thực thi lặp vô hạn.
-- Calculator không cho chạy tên biến, function hoặc mã hệ thống.
-- Agent không được tự bịa sản phẩm, giá, tồn kho hoặc thời tiết.
+- Không có tool chạy shell, SQL tùy ý, ghi dữ liệu hoặc xóa database.
+- Agent không được tự bịa sản phẩm, giá, tồn kho, phí ship hoặc trạng thái đơn.
 
 ## Chạy test và evaluation
 
@@ -230,12 +378,15 @@ python -m experiments.context_window
 python -m experiments.system_prompts
 python -m experiments.prompt_suite
 python -m experiments.agent_evaluation
+python -m experiments.rag_evaluation
+python -m experiments.pgvector_smoke
 ```
 
 Các experiment cần server đang chạy và ít nhất một API key hợp lệ. Kết quả được
-ghi vào thư mục `experiment-results/`. `agent_evaluation` kiểm tra chính xác
-chuỗi tool của sáu tình huống: không cần tool, calculator, tìm sản phẩm, lấy chi
-tiết, so sánh sản phẩm và thời tiết kết hợp tư vấn mua sắm.
+ghi vào thư mục `experiment-results/`. `agent_evaluation` chạy đúng 50 case và
+chỉ thành công khi ít nhất 90% case đúng. Corpus bao phủ không cần tool, một hoặc
+nhiều tool, thiếu dữ liệu, arguments sai, không tìm thấy dữ liệu, lỗi, timeout,
+tool bị cấm và yêu cầu phá hoại.
 
 ## Cách API xử lý lỗi
 

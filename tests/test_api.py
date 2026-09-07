@@ -3,6 +3,9 @@ from fastapi.testclient import TestClient
 from app.config import Settings
 from app.llm.router import ModelRouter
 from app.main import create_app
+from app.rag.embeddings import LocalHashEmbeddingProvider
+from app.rag.service import RagService
+from app.rag.store import InMemoryVectorStore
 from app.schemas.chat import StreamChunk
 from app.schemas.chat import FunctionCall, ToolCall
 from tests.fakes import FakeProvider, response
@@ -14,9 +17,18 @@ def make_client(provider: FakeProvider) -> TestClient:
         llm_provider=provider.name,
         llm_fallback_providers=[],
         llm_max_retries=0,
+        reranker_enabled=False,
     )
     router = ModelRouter({provider.name: provider}, settings)
-    return TestClient(create_app(settings=settings, model_router=router))
+    rag_service = RagService(
+        embeddings=LocalHashEmbeddingProvider(64),
+        store=InMemoryVectorStore(),
+        model_router=router,
+        settings=settings,
+    )
+    return TestClient(
+        create_app(settings=settings, model_router=router, rag_service=rag_service)
+    )
 
 
 def test_chat_endpoint_returns_unified_camel_case_response() -> None:
@@ -91,22 +103,25 @@ def test_agent_endpoint_executes_tool_loop_and_returns_trace() -> None:
     first.finish_reason = "tool_calls"
     first.tool_calls = [
         ToolCall(
-            id="calc-1",
-            function=FunctionCall(name="calculate", arguments='{"expression":"6*7"}'),
+            id="stock-1",
+            function=FunctionCall(
+                name="check_inventory", arguments='{"product_ref":"P001"}'
+            ),
         )
     ]
     provider = FakeProvider(
         "openai",
-        responses=[first, response("openai", "42")],
+        responses=[first, response("openai", "P001 còn 8 sản phẩm.")],
     )
     with make_client(provider) as client:
         result = client.post(
             "/api/agent/chat",
-            json={"message": "Calculate 6 * 7", "options": {"temperature": 0}},
+            json={"message": "P001 còn hàng không?", "options": {"temperature": 0}},
         )
     assert result.status_code == 200
     body = result.json()
-    assert body["content"] == "42"
+    assert body["content"] == "P001 còn 8 sản phẩm."
     assert body["totalToolCalls"] == 1
-    assert body["trace"][1]["tool"] == "calculate"
+    assert body["trace"][1]["tool"] == "check_inventory"
+    assert body["trace"][1]["result"]["data"]["quantity"] == 8
     assert result.headers["X-Request-ID"]

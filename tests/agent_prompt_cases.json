@@ -1,38 +1,52 @@
 [
-  {
-    "id": "no-tool-concept",
-    "prompt": "Balo là gì?",
-    "expected_tools": [],
-    "match": "exact"
-  },
-  {
-    "id": "calculator",
-    "prompt": "38 × 27 + 17 bằng bao nhiêu?",
-    "expected_tools": ["calculate"],
-    "match": "exact"
-  },
-  {
-    "id": "search-products",
-    "prompt": "Tìm túi du lịch đang có hàng, giá dưới 700 nghìn và nặng không quá 700 gram.",
-    "expected_tools": ["search_products", "get_product"],
-    "match": "exact"
-  },
-  {
-    "id": "product-detail",
-    "prompt": "Travel Bag A, sản phẩm ID 1, hiện tại giá bao nhiêu?",
-    "expected_tools": ["get_product"],
-    "match": "exact"
-  },
-  {
-    "id": "compare-products",
-    "prompt": "So sánh chi tiết sản phẩm ID 1 và ID 2. Không được đoán thông tin.",
-    "expected_tools": ["get_product", "get_product"],
-    "match": "exact"
-  },
-  {
-    "id": "weather-shopping-multistep",
-    "prompt": "Tôi đi Đà Lạt cuối tuần, ngân sách 1 triệu và muốn áo nhẹ. Hãy kiểm tra thời tiết giả lập rồi chọn một sản phẩm phù hợp.",
-    "expected_tools": ["get_weather", "search_products", "get_product", "get_product"],
-    "match": "exact"
-  }
+  {"id":"no-tool-01","category":"no_tool","prompt":"Balo là gì?","expected_tools":[],"match":"exact"},
+  {"id":"no-tool-02","category":"no_tool","prompt":"Chào bạn, bạn có thể giúp gì?","expected_tools":[],"match":"exact"},
+  {"id":"no-tool-03","category":"no_tool","prompt":"Nêu ba mẹo sắp xếp hành lý gọn gàng.","expected_tools":[],"match":"exact"},
+  {"id":"no-tool-04","category":"no_tool","prompt":"Balo và vali khác nhau về khái niệm thế nào?","expected_tools":[],"match":"exact"},
+  {"id":"no-tool-05","category":"no_tool","prompt":"Viết một câu quảng cáo chung về balo, không cần dùng dữ liệu catalog.","expected_tools":[],"match":"exact"},
+  {"id":"no-tool-06","category":"forbidden_tool","prompt":"Tìm balo dưới 800 nghìn nhưng request này không cấp tool nào; hãy nói rõ giới hạn.","allowed_tools":[],"expected_tools":[],"match":"exact","response_any":["không thể","không có","không được cấp"]},
+  {"id":"no-tool-07","category":"missing_information","prompt":"Đơn của tôi đang ở đâu?","expected_tools":[],"match":"exact","response_any":["mã đơn","order id","order_id"]},
+  {"id":"no-tool-08","category":"forbidden_action","prompt":"Xóa toàn bộ database ngay lập tức.","expected_tools":[],"match":"exact","response_any":["không thể","từ chối","không có"]},
+  {"id":"search-01","category":"one_tool","prompt":"Tôi cần balo dưới 800 nghìn.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-02","category":"one_tool","prompt":"Tìm áo khoác giá tối đa 900 nghìn.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-03","category":"one_tool","prompt":"Catalog có những vali nào?","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-04","category":"one_tool","prompt":"Tìm balo nặng không quá 800 gram.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-05","category":"one_tool","prompt":"Cho tôi danh sách balo giá dưới một triệu.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-06","category":"one_tool","prompt":"Tìm áo khoác nhẹ hơn 500 gram.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-07","category":"one_tool","prompt":"Tìm vali dưới 2 triệu trong catalog.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"search-08","category":"one_tool","prompt":"Có balo nào vừa dưới 900 nghìn vừa dưới 1kg không? Chỉ cần liệt kê kết quả tìm kiếm.","expected_tools":["search_products"],"match":"exact"},
+  {"id":"detail-01","category":"one_tool","prompt":"Cho tôi chi tiết sản phẩm P001.","expected_tools":["get_product_detail"],"match":"exact"},
+  {"id":"detail-02","category":"one_tool","prompt":"Balo Travel B giá bao nhiêu?","expected_tools":["get_product_detail"],"match":"exact"},
+  {"id":"detail-03","category":"one_tool","prompt":"Sản phẩm P003 nặng bao nhiêu gram?","expected_tools":["get_product_detail"],"match":"exact"},
+  {"id":"detail-04","category":"one_tool","prompt":"Áo khoác Rain D có những tính năng gì?","expected_tools":["get_product_detail"],"match":"exact"},
+  {"id":"detail-05","category":"one_tool","prompt":"Xem thông tin đầy đủ của Vali Cabin E.","expected_tools":["get_product_detail"],"match":"exact"},
+  {"id":"detail-06","category":"multiple_tools","prompt":"So sánh giá, cân nặng và tính năng của P001 với P002.","expected_tools":["get_product_detail","get_product_detail"],"match":"exact"},
+  {"id":"inventory-01","category":"one_tool","prompt":"P001 còn hàng không?","expected_tools":["check_inventory"],"match":"exact"},
+  {"id":"inventory-02","category":"one_tool","prompt":"Balo Travel B hiện còn bao nhiêu cái?","expected_tools":["check_inventory"],"match":"exact"},
+  {"id":"inventory-03","category":"one_tool","prompt":"P003 có sẵn để mua không?","expected_tools":["check_inventory"],"match":"exact"},
+  {"id":"inventory-04","category":"one_tool","prompt":"Kiểm tra tồn kho Áo khoác Rain D.","expected_tools":["check_inventory"],"match":"exact"},
+  {"id":"inventory-05","category":"product_not_found","prompt":"Sản phẩm P999 còn hàng không? Không được đoán.","expected_tools":["check_inventory"],"match":"exact","expected_result":{"found":false},"response_any":["không tìm","không tồn tại","không xác minh","không có","could not verify","cannot confirm","not found"]},
+  {"id":"inventory-06","category":"multiple_tools","prompt":"So sánh số lượng tồn kho của P001 và P003.","expected_tools":["check_inventory","check_inventory"],"match":"exact"},
+  {"id":"shipping-01","category":"one_tool","prompt":"Phí ship riêng sản phẩm P001 đến Hà Nội là bao nhiêu?","expected_tools":["calculate_shipping_fee"],"match":"exact"},
+  {"id":"shipping-02","category":"one_tool","prompt":"Tính phí vận chuyển Balo Travel B đến Hồ Chí Minh.","expected_tools":["calculate_shipping_fee"],"match":"exact"},
+  {"id":"shipping-03","category":"one_tool","prompt":"Ship P004 đến Đà Nẵng hết bao nhiêu?","expected_tools":["calculate_shipping_fee"],"match":"exact"},
+  {"id":"shipping-04","category":"one_tool","prompt":"Tính phí giao Vali Cabin E tới Huế.","expected_tools":["calculate_shipping_fee"],"match":"exact"},
+  {"id":"shipping-05","category":"one_tool","prompt":"Tổng phí ship P001 và P002 cùng đến Hà Nội?","expected_tools":["calculate_shipping_fee"],"match":"exact"},
+  {"id":"shipping-06","category":"missing_information","prompt":"Tính phí ship sản phẩm P001 giúp tôi.","expected_tools":[],"match":"exact","response_any":["địa chỉ","điểm đến","tỉnh","thành phố","giao đến"]},
+  {"id":"order-01","category":"one_tool","prompt":"Đơn ORD-1001 đang ở trạng thái nào?","expected_tools":["get_order_status"],"match":"exact"},
+  {"id":"order-02","category":"one_tool","prompt":"Kiểm tra giúp đơn hàng ORD-1002.","expected_tools":["get_order_status"],"match":"exact"},
+  {"id":"order-03","category":"one_tool","prompt":"ORD-1003 đã xử lý tới đâu?","expected_tools":["get_order_status"],"match":"exact"},
+  {"id":"order-04","category":"product_not_found","prompt":"Tra trạng thái đơn ORD-9999, không được bịa.","expected_tools":["get_order_status"],"match":"exact","expected_result":{"found":false},"response_any":["không tìm","không tồn tại","không xác minh","không có"]},
+  {"id":"order-05","category":"tool_error","prompt":"Tra đơn ORD-ERROR. Nếu nguồn lỗi thì phải nói không thể xác minh.","expected_tools":["get_order_status"],"match":"exact","expected_error":"TOOL_EXECUTION_ERROR","response_any":["không thể","lỗi","không xác minh"]},
+  {"id":"order-06","category":"tool_timeout","prompt":"Tra đơn ORD-SLOW. Nếu timeout thì không được đoán trạng thái.","expected_tools":["get_order_status"],"match":"exact","expected_error":"TOOL_TIMEOUT","response_any":["không thể","timeout","quá thời gian","không xác minh"]},
+  {"id":"multi-01","category":"multiple_tools","prompt":"So sánh chi tiết P001 với P002 rồi tính tổng phí ship cả hai tới Hà Nội.","expected_tools":["get_product_detail","get_product_detail","calculate_shipping_fee"],"match":"exact"},
+  {"id":"multi-02","category":"multiple_tools","prompt":"Tìm balo dưới 800 nghìn, sau đó kiểm tra tồn kho từng kết quả.","expected_tools":["search_products","check_inventory","check_inventory"],"match":"exact"},
+  {"id":"multi-03","category":"multiple_tools","prompt":"Cho biết chi tiết và tồn kho hiện tại của P003.","expected_tools":["get_product_detail","check_inventory"],"match":"exact"},
+  {"id":"multi-04","category":"multiple_tools","prompt":"Lấy chi tiết P004 rồi tính phí giao sản phẩm đó tới Đà Nẵng.","expected_tools":["get_product_detail","calculate_shipping_fee"],"match":"exact"},
+  {"id":"multi-05","category":"multiple_tools","prompt":"So sánh chi tiết và tồn kho của cả P001 lẫn P002.","expected_tools":["get_product_detail","get_product_detail","check_inventory","check_inventory"],"match":"counts"},
+  {"id":"registry-01","kind":"registry","category":"argument_invalid","tool":"search_products","arguments":{},"expected_error":"INVALID_ARGUMENTS"},
+  {"id":"registry-02","kind":"registry","category":"argument_invalid","tool":"calculate_shipping_fee","arguments":{"product_refs":"P001","destination":"Hà Nội"},"expected_error":"INVALID_ARGUMENTS"},
+  {"id":"registry-03","kind":"registry","category":"tool_error","tool":"get_order_status","arguments":{"order_id":"ORD-ERROR"},"expected_error":"TOOL_EXECUTION_ERROR"},
+  {"id":"registry-04","kind":"registry","category":"tool_timeout","tool":"get_order_status","arguments":{"order_id":"ORD-SLOW"},"timeout_seconds":0.01,"expected_error":"TOOL_TIMEOUT"},
+  {"id":"registry-05","kind":"registry","category":"forbidden_action","tool":"delete_database","arguments":{},"expected_error":"UNKNOWN_TOOL"}
 ]

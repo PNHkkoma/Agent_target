@@ -2,18 +2,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 
-from app.agent.runner import AgentRunner
+from app.agent.runner import ShoppingAgentV0
 from app.schemas.agent import AgentRequest, AgentResponse
 
 router = APIRouter(prefix="/api/agent", tags=["agent"])
 
 
-# Nhận FastAPI request; trả AgentRunner dùng chung đã được khởi tạo trong application state.
-def get_agent_runner(request: Request) -> AgentRunner:
+# Nhận FastAPI request; trả ShoppingAgentV0 dùng chung trong application state.
+def get_agent_runner(request: Request) -> ShoppingAgentV0:
     return request.app.state.agent_runner
 
 
-AgentDependency = Annotated[AgentRunner, Depends(get_agent_runner)]
+AgentDependency = Annotated[ShoppingAgentV0, Depends(get_agent_runner)]
 
 
 # Nhận body AgentRequest, request context và runner; trả câu trả lời cùng trace agent.

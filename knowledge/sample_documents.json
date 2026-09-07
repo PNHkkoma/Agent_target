@@ -1,0 +1,98 @@
+[
+  {
+    "id": "compression-manual",
+    "title": "Hướng dẫn túi nén Travel Compression Pro",
+    "source_uri": "https://knowledge.local/manuals/compression-pro",
+    "document_type": "manual",
+    "metadata": {"product_id": "CB-PRO", "locale": "vi-VN"},
+    "content": "Travel Compression Pro được làm từ ripstop nylon 70D, khóa kéo YKK và lớp phủ chống ẩm. Bộ gồm ba cỡ: S 30 x 20 cm, M 35 x 25 cm và L 40 x 30 cm.\n\nCách dùng: gấp quần áo phẳng, cho vào tối đa hai phần ba túi, đóng khóa chính rồi kéo khóa nén vòng ngoài. Không dùng để nén đồ dễ vỡ, thiết bị điện tử hoặc vật có cạnh sắc. Túi nén giúp giảm thể tích nhưng không làm giảm cân nặng hành lý."
+  },
+  {
+    "id": "japan-cabin-policy",
+    "title": "Ghi chú hành lý cabin đi Nhật",
+    "source_uri": "https://knowledge.local/travel/japan-cabin-demo",
+    "document_type": "travel",
+    "metadata": {"destination": "japan", "locale": "vi-VN"},
+    "content": "Giới hạn cabin phụ thuộc hãng bay và hạng vé. Trong bộ dữ liệu demo, mức thường gặp là 7 kg và tổng ba chiều không quá 115 cm. Người đi phải kiểm tra lại website hoặc vé của hãng trước ngày bay vì quy định có thể thay đổi.\n\nTúi nén chỉ giảm thể tích, không giảm khối lượng. Với chuyến Nhật tám ngày vào tháng 12, nên cân hành lý sau khi đóng gói và chừa khoảng 0,5 kg dự phòng."
+  },
+  {
+    "id": "winter-packing-guide",
+    "title": "Cẩm nang đóng đồ mùa đông Nhật Bản",
+    "source_uri": "https://knowledge.local/guides/japan-winter-packing",
+    "document_type": "travel",
+    "metadata": {"destination": "japan", "season": "winter", "locale": "vi-VN"},
+    "content": "Đi Nhật tháng 12 nên đóng đồ theo lớp: áo giữ nhiệt, lớp giữa nhẹ và áo khoác ngoài cản gió. Cuộn riêng tất và đồ lót trong túi cỡ S; áo giữ nhiệt dùng túi cỡ M. Áo khoác phồng có thể dùng túi cỡ L nếu nhãn chăm sóc cho phép nén.\n\nKhông nên mang tám bộ quần áo hoàn chỉnh cho tám ngày. Có thể phối lại lớp giữa và dành chỗ cho thuốc, bộ chuyển ổ cắm và túi đựng đồ bẩn."
+  },
+  {
+    "id": "compression-review",
+    "title": "Tổng hợp review Travel Compression Pro",
+    "source_uri": "https://knowledge.local/reviews/compression-pro-demo",
+    "document_type": "review",
+    "metadata": {"product_id": "CB-PRO", "locale": "vi-VN"},
+    "content": "Trong 24 review demo đã kiểm duyệt, người dùng đánh giá khóa kéo trơn và vải ripstop khó rách khi dùng đúng mức hai phần ba túi. Điểm trung bình giả lập là 4,4 trên 5.\n\nPhản hồi tiêu cực thường gặp là túi cỡ L làm người dùng dễ đóng quá nhiều đồ và vượt cân cabin. Đây là dữ liệu review giả lập phục vụ học RAG, không phải đánh giá khách hàng thật."
+  },
+  {
+    "id": "return-policy",
+    "title": "Chính sách đổi trả túi du lịch",
+    "source_uri": "https://knowledge.local/policies/returns",
+    "document_type": "policy",
+    "metadata": {"market": "demo", "policy_kind": "returns", "locale": "vi-VN"},
+    "content": "Sản phẩm demo chưa qua sử dụng được yêu cầu đổi trả trong 30 ngày kể từ ngày nhận. Khách hàng cần giữ hóa đơn và bao bì. Sản phẩm rách do nhồi quá mức hoặc chứa vật sắc nhọn không thuộc phạm vi lỗi sản xuất.\n\nYêu cầu đổi trả phải được bộ phận hỗ trợ xác nhận trước khi gửi hàng. Chính sách này chỉ áp dụng cho cửa hàng demo trong dự án Agent Lab."
+  },
+  {
+    "id": "product-ab-123",
+    "title": "Thông số túi nén AirLite AB-123",
+    "source_uri": "https://knowledge.local/products/AB-123",
+    "document_type": "product",
+    "metadata": {"product_id": "AB-123", "category": "compression_bag", "locale": "vi-VN"},
+    "content": "AirLite mã SKU AB-123 là túi nén cabin dung tích 12 lít, nặng 180 gram, làm từ nylon 40D. Kích thước sau khi đóng là 32 x 22 x 10 cm. Sản phẩm có màu xanh rêu, tải khuyến nghị tối đa 4 kg và không chống nước hoàn toàn.\n\nAB-123 phù hợp quần áo mỏng cho chuyến đi ngắn. Không dùng túi này để chứa laptop, pin dự phòng hoặc vật sắc nhọn."
+  },
+  {
+    "id": "product-ab-124",
+    "title": "Thông số túi nén AirLite Plus AB-124",
+    "source_uri": "https://knowledge.local/products/AB-124",
+    "document_type": "product",
+    "metadata": {"product_id": "AB-124", "category": "compression_bag", "locale": "vi-VN"},
+    "content": "AirLite Plus mã SKU AB-124 là túi nén 18 lít, nặng 260 gram, làm từ polyester 210D. Kích thước sau khi đóng là 38 x 27 x 12 cm. Sản phẩm có màu đen, tải khuyến nghị tối đa 6 kg và có lớp phủ kháng nước nhẹ.\n\nAB-124 lớn và bền hơn AB-123 nhưng chiếm nhiều thể tích cabin hơn. Không dùng sản phẩm để chứa thiết bị điện tử dễ vỡ."
+  },
+  {
+    "id": "warranty-policy",
+    "title": "Chính sách bảo hành phụ kiện du lịch",
+    "source_uri": "https://knowledge.local/policies/warranty",
+    "document_type": "policy",
+    "metadata": {"market": "demo", "policy_kind": "warranty", "locale": "vi-VN"},
+    "content": "Khóa kéo và đường may của phụ kiện du lịch demo được bảo hành 12 tháng từ ngày mua. Bảo hành áp dụng cho lỗi vật liệu hoặc gia công được xác nhận. Khách hàng cần cung cấp mã đơn hàng và ảnh lỗi.\n\nHư hỏng do dao kéo, giặt máy, nhiệt độ cao, nhồi quá tải hoặc hao mòn tự nhiên không thuộc phạm vi bảo hành. Thời gian phản hồi hồ sơ dự kiến là ba ngày làm việc."
+  },
+  {
+    "id": "care-manual",
+    "title": "Hướng dẫn vệ sinh và bảo quản túi nén",
+    "source_uri": "https://knowledge.local/manuals/compression-care",
+    "document_type": "manual",
+    "metadata": {"category": "compression_bag", "locale": "vi-VN"},
+    "content": "Vệ sinh túi nén bằng khăn ẩm và xà phòng dịu nhẹ. Không giặt máy, không dùng thuốc tẩy, không sấy nóng và không là trực tiếp. Sau khi vệ sinh, mở toàn bộ khóa kéo rồi phơi trong bóng râm đến khi khô hẳn.\n\nKhi cất giữ, không gập mạnh qua đường khóa kéo. Bảo quản ở nơi khô thoáng, tránh nắng trực tiếp và đặt gói hút ẩm riêng nếu môi trường có độ ẩm cao."
+  },
+  {
+    "id": "cabin-safety-policy",
+    "title": "Ghi chú an toàn chất lỏng và pin trong cabin",
+    "source_uri": "https://knowledge.local/travel/cabin-safety",
+    "document_type": "travel",
+    "metadata": {"topic": "cabin_safety", "locale": "vi-VN"},
+    "content": "Trong dữ liệu hướng dẫn demo, chất lỏng cabin nên đựng trong chai không quá 100 ml và gom trong túi trong suốt có thể đóng kín. Quy định cụ thể phụ thuộc sân bay và hãng bay nên hành khách phải kiểm tra nguồn chính thức trước chuyến đi.\n\nPin dự phòng phải để trong hành lý xách tay, bảo vệ đầu cực và không đặt trong hành lý ký gửi. Giới hạn dung lượng pin phụ thuộc hãng bay; tài liệu demo không thay thế quy định chính thức."
+  },
+  {
+    "id": "japan-adapter-guide",
+    "title": "Hướng dẫn ổ cắm điện khi đi Nhật",
+    "source_uri": "https://knowledge.local/travel/japan-power-adapter",
+    "document_type": "travel",
+    "metadata": {"destination": "japan", "topic": "power", "locale": "vi-VN"},
+    "content": "Nhật Bản thường dùng ổ cắm chân dẹt loại A và điện áp 100 V. Du khách từ Việt Nam nên kiểm tra nhãn input của bộ sạc; thiết bị ghi 100-240V thường chỉ cần đầu chuyển chân cắm phù hợp.\n\nMáy sấy hoặc thiết bị chỉ hỗ trợ 220V có thể cần bộ biến áp, không chỉ là đầu chuyển. Nên mang một đầu chuyển nhỏ trong hành lý cabin và không cắm thiết bị vượt công suất định mức."
+  },
+  {
+    "id": "shipping-policy",
+    "title": "Chính sách giao hàng cửa hàng demo",
+    "source_uri": "https://knowledge.local/policies/shipping",
+    "document_type": "policy",
+    "metadata": {"market": "demo", "policy_kind": "shipping", "locale": "vi-VN"},
+    "content": "Đơn nội thành Hà Nội dự kiến giao trong 1 đến 2 ngày làm việc. Đơn đến Thành phố Hồ Chí Minh dự kiến 2 đến 4 ngày; các tỉnh khác dự kiến 3 đến 6 ngày. Đây là thời gian dự kiến, không phải cam kết tuyệt đối.\n\nĐơn từ 500.000 đồng được miễn phí giao tiêu chuẩn trong dữ liệu demo. Phí giao hỏa tốc và vùng xa được tính riêng ở bước thanh toán."
+  }
+]

@@ -1,6 +1,13 @@
 from app.config import Settings
 
 
+# Không nhận đầu vào; xác nhận cấu hình mặc định production dùng semantic OpenAI thay vì local hash.
+def test_production_embedding_default_is_openai() -> None:
+    configured = Settings(_env_file=None)
+    assert configured.embedding_provider == "openai"
+    assert configured.embedding_model == "text-embedding-3-small"
+
+
 def test_provider_is_switched_only_by_config() -> None:
     settings = Settings(
         _env_file=None,

@@ -1,8 +1,32 @@
 services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg17
+    environment:
+      POSTGRES_DB: agent_lab
+      POSTGRES_USER: agent
+      POSTGRES_PASSWORD: agent
+    ports:
+      - "5433:5432"
+    volumes:
+      - agent-lab-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent -d agent_lab"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   agent-lab:
     build: .
     env_file: .env
+    environment:
+      RAG_STORE: postgres
+      RAG_DATABASE_URL: postgresql://agent:agent@postgres:5432/agent_lab
     ports:
       - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
+volumes:
+  agent-lab-postgres:

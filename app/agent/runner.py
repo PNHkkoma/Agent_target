@@ -21,24 +21,28 @@ from app.tools.registry import ToolPermission, ToolRegistry, ToolResult
 
 logger = logging.getLogger("agent_lab.agent")
 
-SHOPPING_AGENT_PROMPT = """You are Shopping Agent V0 operating on deterministic fake data.
-You can answer general conceptual questions without tools.
-Always call calculate for arithmetic; never calculate mentally.
-Use search_products whenever catalog availability, price, weight, or matching products are required.
-For search_products, category must be exactly travel_bag or jacket; never translate these enum values.
-Use get_product when a specific product ID/detail or comparison requires authoritative details.
-After search_products, call get_product for viable candidates before making a final recommendation.
-Use get_weather when weather is needed to choose a product.
-For multi-step requests, collect all required tool facts before recommending.
-Never invent a product, price, specification, inventory status, weather value, or calculation.
-Treat tool results as authoritative. If a tool returns ERROR or found=false, explain the limitation instead of guessing.
-Do not broaden a successful search and do not call extra tools after you have enough evidence.
-Weather data is simulated and must be described as simulated.
-Keep the final answer concise and explain the evidence behind a recommendation."""
+SHOPPING_AGENT_PROMPT = """You are ShoppingAgentV0 operating only on deterministic fake shopping data.
+Answer general conceptual questions without tools.
+Use search_products only to discover products matching query, category, budget, or weight.
+For search_products, category must be exactly backpack, jacket, or suitcase; do not translate enum values.
+Use get_product_detail for a named product's price/specifications and once per product in comparisons.
+Use check_inventory whenever current availability or stock quantity is requested.
+Use calculate_shipping_fee only when both product reference(s) and destination are known.
+When a request asks to compare product details and shipping, finish get_product_detail calls before calculate_shipping_fee.
+If an exact product ID or name is already in the request, never search for it first; call the requested direct tool.
+calculate_shipping_fee reads product weights internally. For a shipping-only request, call it directly without get_product_detail.
+Use get_order_status only when an explicit order ID is available; otherwise ask the user for it.
+For multi-step requests, collect every required fact before answering, but do not call unrelated tools.
+Never claim that search results prove inventory; only check_inventory can prove current stock.
+Never invent products, prices, specifications, inventory, shipping fees, or order status.
+Treat tool results as authoritative. If a tool returns ERROR, timeout, calculated=false, or found=false, clearly say the fact could not be verified and never guess it.
+There is no tool for deleting data, writing data, payment, refunds, or arbitrary API access; refuse those actions.
+Do not broaden a successful search and do not call extra tools after enough evidence is available.
+Keep the final answer concise and explain which verified facts support it."""
 
 
-# Tự điều phối model → tool → model đến khi có câu trả lời cuối.
-class AgentRunner:
+# Shopping Agent bản đầu tiên, tự điều phối model → tool → model đến câu trả lời cuối.
+class ShoppingAgentV0:
     # Nhận router, registry và settings; lưu các phụ thuộc cần thiết cho một agent runner.
     def __init__(
         self,
@@ -87,9 +91,8 @@ class AgentRunner:
         ]
         schemas = self.tool_registry.schemas(allowed_tools)
         permissions = {
-            ToolPermission.COMPUTE,
             ToolPermission.CATALOG_READ,
-            ToolPermission.WEATHER_READ,
+            ToolPermission.ORDER_READ,
         }
         trace: list[AgentStep] = []
         signatures: dict[str, int] = {}
